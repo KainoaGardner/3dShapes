@@ -38,30 +38,13 @@ class Cube:
             Point(0, 0, math.sqrt((startSize * startSize) * 2), scale, GREEN),
             Point(0, 0, -math.sqrt((startSize * startSize) * 2), scale, GREEN),
         ]
-        dodecaSize = (startSize + math.sqrt(5)) / 2
-        self.dodecahedron = [
-            Point(dodecaSize, dodecaSize, dodecaSize, scale, YELLOW),
-            Point(dodecaSize, dodecaSize, -dodecaSize, scale, YELLOW),
-            Point(dodecaSize, -dodecaSize, -dodecaSize, scale, YELLOW),
-            Point(-dodecaSize, -dodecaSize, dodecaSize, scale, YELLOW),
-            Point(dodecaSize, -dodecaSize, dodecaSize, scale, YELLOW),
-            Point(-dodecaSize, -dodecaSize, -dodecaSize, scale, YELLOW),
-            Point(-dodecaSize, dodecaSize, dodecaSize, scale, YELLOW),
-            Point(-dodecaSize, dodecaSize, -dodecaSize, scale, YELLOW),
-            Point(0, (dodecaSize * dodecaSize), dodecaSize, scale, YELLOW),
-            Point(0, -(dodecaSize * dodecaSize), startSize, scale, YELLOW),
-            Point(0, (dodecaSize * dodecaSize), -startSize, scale, YELLOW),
-            Point(0, -(dodecaSize * dodecaSize), -startSize, scale, YELLOW),
-            Point((dodecaSize * dodecaSize), startSize, 0, scale, YELLOW),
-            Point(-(dodecaSize * dodecaSize), startSize, 0, scale, YELLOW),
-            Point((dodecaSize * dodecaSize), -startSize, 0, scale, YELLOW),
-            Point(-(dodecaSize * dodecaSize), -startSize, 0, scale, YELLOW),
-            Point(startSize, 0, (dodecaSize * dodecaSize), scale, YELLOW),
-            Point(startSize, 0, -(dodecaSize * dodecaSize), scale, YELLOW),
-            Point(-startSize, 0, (dodecaSize * dodecaSize), scale, YELLOW),
-            Point(-startSize, 0, -(dodecaSize * dodecaSize), scale, YELLOW),
-        ]
 
+        self.cone = self.makeCone(startSize, scale)
+        self.dodecahedron = self.makeDodecahedron(startSize, scale)
+        self.cylinder = self.makeCylinder(startSize, scale)
+        self.circle = self.makeCircle(startSize, scale)
+
+        self.startSize = startSize
         self.mode = 1
         self.pressed = False
         self.xOffset = 0
@@ -87,6 +70,70 @@ class Cube:
             self.scale = self.scale / self.camZ
         else:
             self.scale = self.scale
+
+    def makeDodecahedron(self, startSize, scale):
+        points = [
+            Point(startSize, startSize, -startSize, scale, YELLOW),
+            Point(startSize, startSize, startSize, scale, YELLOW),
+            Point(startSize, -startSize, -startSize, scale, YELLOW),
+            Point(startSize, -startSize, startSize, scale, YELLOW),
+            Point(-startSize, startSize, -startSize, scale, YELLOW),
+            Point(-startSize, startSize, startSize, scale, YELLOW),
+            Point(-startSize, -startSize, -startSize, scale, YELLOW),
+            Point(-startSize, -startSize, startSize, scale, YELLOW),
+        ]
+        gR = (1 + math.sqrt(5)) / 2
+        print(gR)
+
+        points.append(Point(startSize / gR, gR * startSize, 0, scale, GREEN))
+        points.append(Point(startSize / gR, -gR * startSize, 0, scale, GREEN))
+        points.append(Point(-startSize / gR, gR * startSize, 0, scale, GREEN))
+        points.append(Point(-startSize / gR, -gR * startSize, 0, scale, GREEN))
+
+        points.append(Point(gR * startSize, 0, startSize / gR, scale, BLUE))
+        points.append(Point(-gR * startSize, 0, startSize / gR, scale, BLUE))
+        points.append(Point(gR * startSize, 0, -startSize / gR, scale, BLUE))
+        points.append(Point(-gR * startSize, 0, -startSize / gR, scale, BLUE))
+
+        points.append(Point(0, startSize / gR, gR * startSize, scale, RED))
+        points.append(Point(0, startSize / gR, -gR * startSize, scale, RED))
+        points.append(Point(0, -startSize / gR, gR * startSize, scale, RED))
+        points.append(Point(0, -startSize / gR, -gR * startSize, scale, RED))
+
+        return points
+
+    def makeCone(self, length, scale):
+        points = []
+        points.append(Point(0, length, 0, scale, YELLOW))
+        for i in range(36):
+            x = length * math.cos(math.radians(i * 10))
+            z = length * math.sin(math.radians(i * 10))
+            points.append(Point(x, -length, z, scale, YELLOW))
+        return points
+
+    def makeCylinder(self, length, scale):
+        points = []
+        for i in range(36):
+            x = (length) * math.cos(math.radians(i * 10))
+            z = (length) * math.sin(math.radians(i * 10))
+            points.append(Point(x, length, z, scale, PURPLE))
+            points.append(Point(x, -length, z, scale, PURPLE))
+        return points
+
+    def makeCircle(self, radius, scale):
+        points = []
+        radius = radius * 1.5
+        for turnAng in range(18):
+            for heightAng in range(18):
+                tAng = math.radians(turnAng * 20)
+                hAng = math.radians(heightAng * 20)
+                # y = radius * math.sin(math.radians(heightAng * 10))
+                x = radius * math.cos(tAng) * math.sin(hAng)
+                y = radius * math.sin(tAng) * math.sin(hAng)
+                z = radius * math.cos(hAng)
+                points.append(Point(x, y, z, scale, ORANGE))
+
+        return points
 
     def movePoints(self):
         keys = pygame.key.get_pressed()
@@ -155,9 +202,18 @@ class Cube:
         if keys[pygame.K_4]:
             self.points = self.octahedron
             self.pointLines = self.getLines(self.points)
-        # if keys[pygame.K_5]:
-        #    self.points = self.dodecahedron
-        #    self.pointLines = self.getLines(self.points)
+        if keys[pygame.K_5]:
+            self.points = self.cone
+            self.pointLines = self.getLines(self.points)
+        if keys[pygame.K_6]:
+            self.points = self.cylinder
+            self.pointLines = self.getLines(self.points)
+        if keys[pygame.K_7]:
+            self.points = self.circle
+            self.pointLines = self.getLines(self.points)
+        if keys[pygame.K_8]:
+            self.points = self.dodecahedron
+            self.pointLines = self.getLines(self.points)
 
         if keys[pygame.K_SPACE] and not self.pressed:
             self.pressed = True
@@ -180,6 +236,12 @@ class Cube:
 
     def getLines(self, shape):
         connections = []
+        if shape == self.cone:
+            point1 = self.cone[0]
+            for i in range(1, len(self.points)):
+                point2 = self.cone[i]
+                connections.append((point1, point2))
+
         for i in range(len(self.points) - 1):
             for j in range(i + 1, len(self.points)):
                 point1 = self.points[i]
@@ -204,7 +266,44 @@ class Cube:
                 ):
                     connections.append((point1, point2))
 
+                if shape == self.dodecahedron:
+                    if self.dodecahedronLines(self.startSize, point1, point2):
+                        connections.append((point1, point2))
+
+                if shape == self.cylinder and (
+                    (point1.x == point2.x and point1.z == point2.z)
+                ):
+                    connections.append((point1, point2))
+
+                if shape == self.circle:
+                    if self.circleLines(self.startSize, point1, point2):
+                        connections.append((point1, point2))
+
         return connections
+
+    def dodecahedronLines(self, startSize, point1, point2):
+        distance = math.sqrt(
+            math.pow(point2.x - point1.x, 2)
+            + math.pow(point2.y - point1.y, 2)
+            + math.pow(point2.z - point1.z, 2)
+        )
+
+        edgeLength = (math.sqrt(5) * startSize) - startSize
+
+        if edgeLength == distance:
+            return True
+
+        return False
+
+    def circleLines(self, startSize, point1, point2):
+        distance = math.sqrt(
+            math.pow(point2.x - point1.x, 2)
+            + math.pow(point2.y - point1.y, 2)
+            + math.pow(point2.z - point1.z, 2)
+        )
+        if distance < startSize / 1.5:
+            return True
+        return False
 
     def displayLines(self, screen):
         for connection in self.pointLines:
