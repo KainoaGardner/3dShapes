@@ -41,8 +41,10 @@ class Cube:
 
         self.cone = self.makeCone(startSize, scale)
         self.dodecahedron = self.makeDodecahedron(startSize, scale)
+        self.icosahedron = self.makeIcosahedron(startSize, scale)
         self.cylinder = self.makeCylinder(startSize, scale)
         self.circle = self.makeCircle(startSize, scale)
+        self.torus = self.makeTorus(startSize, scale)
 
         self.startSize = startSize
         self.mode = 1
@@ -102,6 +104,26 @@ class Cube:
 
         return points
 
+    def makeIcosahedron(self, startSize, scale):
+        gR = (1 + math.sqrt(5)) / 2
+        points = []
+        points.append(Point(0, startSize, startSize * gR, scale, BLUE))
+        points.append(Point(0, startSize, -startSize * gR, scale, BLUE))
+        points.append(Point(0, -startSize, startSize * gR, scale, BLUE))
+        points.append(Point(0, -startSize, -startSize * gR, scale, BLUE))
+
+        points.append(Point(startSize, startSize * gR, 0, scale, RED))
+        points.append(Point(startSize, -startSize * gR, 0, scale, RED))
+        points.append(Point(-startSize, startSize * gR, 0, scale, RED))
+        points.append(Point(-startSize, -startSize * gR, 0, scale, RED))
+
+        points.append(Point(startSize * gR, 0, startSize, scale, YELLOW))
+        points.append(Point(-startSize * gR, 0, startSize, scale, YELLOW))
+        points.append(Point(startSize * gR, 0, -startSize, scale, YELLOW))
+        points.append(Point(-startSize * gR, 0, -startSize, scale, YELLOW))
+
+        return points
+
     def makeCone(self, length, scale):
         points = []
         points.append(Point(0, length, 0, scale, YELLOW))
@@ -127,11 +149,26 @@ class Cube:
             for heightAng in range(18):
                 tAng = math.radians(turnAng * 20)
                 hAng = math.radians(heightAng * 20)
-                # y = radius * math.sin(math.radians(heightAng * 10))
                 x = radius * math.cos(tAng) * math.sin(hAng)
                 y = radius * math.sin(tAng) * math.sin(hAng)
                 z = radius * math.cos(hAng)
                 points.append(Point(x, y, z, scale, ORANGE))
+
+        return points
+
+    def makeTorus(self, startSize, scale):
+        points = []
+        midRad = startSize * 1.5
+        smallRad = startSize / 2
+        for turnAng in range(18):
+            for heightAng in range(18):
+                tAng = math.radians(turnAng) * 20
+                hAng = math.radians(heightAng) * 20
+
+                x = (midRad + smallRad * math.cos(hAng)) * math.cos(tAng)
+                y = smallRad * math.sin(hAng)
+                z = (midRad + smallRad * math.cos(hAng)) * math.sin(tAng)
+                points.append(Point(x, y, z, scale, RED))
 
         return points
 
@@ -212,7 +249,13 @@ class Cube:
             self.points = self.circle
             self.pointLines = self.getLines(self.points)
         if keys[pygame.K_8]:
+            self.points = self.torus
+            self.pointLines = self.getLines(self.points)
+        if keys[pygame.K_9]:
             self.points = self.dodecahedron
+            self.pointLines = self.getLines(self.points)
+        if keys[pygame.K_0]:
+            self.points = self.icosahedron
             self.pointLines = self.getLines(self.points)
 
         if keys[pygame.K_SPACE] and not self.pressed:
@@ -278,6 +321,12 @@ class Cube:
                 if shape == self.circle:
                     if self.circleLines(self.startSize, point1, point2):
                         connections.append((point1, point2))
+                if shape == self.torus:
+                    if self.torusLines(self.startSize, point1, point2):
+                        connections.append((point1, point2))
+                if shape == self.icosahedron:
+                    if self.icosahedronLines(self.startSize, point1, point2):
+                        connections.append((point1, point2))
 
         return connections
 
@@ -295,6 +344,20 @@ class Cube:
 
         return False
 
+    def icosahedronLines(self, startSize, point1, point2):
+        distance = math.sqrt(
+            math.pow(point2.x - point1.x, 2)
+            + math.pow(point2.y - point1.y, 2)
+            + math.pow(point2.z - point1.z, 2)
+        )
+
+        edgeLength = startSize * 2
+
+        if edgeLength == distance:
+            return True
+
+        return False
+
     def circleLines(self, startSize, point1, point2):
         distance = math.sqrt(
             math.pow(point2.x - point1.x, 2)
@@ -302,6 +365,16 @@ class Cube:
             + math.pow(point2.z - point1.z, 2)
         )
         if distance < startSize / 1.5:
+            return True
+        return False
+
+    def torusLines(self, startSize, point1, point2):
+        distance = math.sqrt(
+            math.pow(point2.x - point1.x, 2)
+            + math.pow(point2.y - point1.y, 2)
+            + math.pow(point2.z - point1.z, 2)
+        )
+        if startSize / 3 < distance < startSize / 1.2 and point1.y == point2.y:
             return True
         return False
 
