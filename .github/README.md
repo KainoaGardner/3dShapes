@@ -4,10 +4,13 @@
 Video Demo
 <https://www.youtube.com/watch?v=DcCE7UvDWak>
 
-<h2>Shapes</h2>
+
 
 <h2>Download</h2>
 <p>Install Python dependices Pygame run the main.py file</p>
+
+
+<h2>Shapes</h2>
 
 <h3>Cube</h3>
 <img src="shape1.png"
