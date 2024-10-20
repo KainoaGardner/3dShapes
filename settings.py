@@ -1,0 +1,12 @@
+WIDTH = 1000
+HEIGHT = 1000
+FPS = 60
+
+RED = "#e74c3c"
+BLUE = "#3498db"
+GREEN = "#2ecc71"
+YELLOW = "#f1c40f"
+PURPLE = "#9b59b6"
+ORANGE = "#e67e22"
+WHITE = "#ecf0f1"
+BLACK = "#121212"
